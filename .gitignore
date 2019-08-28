@@ -112,3 +112,6 @@ venv.bak/
 
 ### Google API Key
 credentials.json
+
+### Google Calendar Token
+token.pickle
