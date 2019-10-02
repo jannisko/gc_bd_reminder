@@ -104,11 +104,7 @@ venv.bak/
 .mypy_cache/
 
 ### Vscode gitignore
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode
 
 ### Google API Key
 credentials.json
