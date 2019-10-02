@@ -7,6 +7,8 @@ import pickle
 import logging
 import re
 
+from pprint import pprint
+
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 from googleapiclient.discovery import build
@@ -39,11 +41,19 @@ def main():
 
     logging.info('Received ' + str(len(events)) + ' events')
 
+
     ## TODO: GET DIFF
+
+    api = ReminderApi()
+    reminders = api.list()
+
+    added_events = get_added(events, reminders)
+    logging.info(f'Found {len(added_events)} new events')
+    #deleted = get_deleted(events, reminders)
     
     for event in events:
         pass
-        create_reminder(event)
+        #create_reminder(event)
 
     if not events:
         logging.info('No upcoming birthday events found.')
@@ -91,12 +101,19 @@ def get_all_events(creds, CALENDAR_ID):
     events = events_result.get('items', [])
     return events
 
+def delete_all_reminders():
+    api = ReminderApi()
+    reminders = api.list()
+    for task in reminders['task']:
+        if(task['taskId']['clientAssignedId'].startswith(APP_NAME)):
+            logging.info(f'Deleting: {task["title"]}')
+            api.delete(task['taskId']['serverAssignedId'])
+
 def create_valid_id(event):
 
     # From https://developers.google.com/calendar/v3/reference/events
     # characters allowed in the ID are those used in base32hex encoding, i.e. lowercase letters a-v and digits 0-9, see section 3.1.2 in RFC2938
     # the length of the ID must be between 5 and 1024 characters
-    # eventIds must be unique, even if they where deleted
 
     regex = re.compile("((?![a-v0-9]).)*")
 
@@ -109,9 +126,25 @@ def create_reminder(event):
     api = ReminderApi()
     start_date = datetime.strptime(event['start']['date'], '%Y-%m-%d')
     start_date += timedelta(hours=8)
-    logging.info('Creating Event: ' + event['summary'] + ', Date: ' + str(start_date))
-    logging.debug('ID: ' + create_valid_id(event))
+    logging.info(f'Creating Event: {event["summary"]}, Date:  + {str(start_date)}')
+    logging.debug(f'ID: {create_valid_id(event)}')
     api.create(event['summary'], due_date=start_date, taskId={'clientAssignedId': create_valid_id(event)})
 
+def get_added(events, reminders):
+    reminder_set = set()
+    added_events = list()
+    for reminder in reminders['task']:
+        reminder_set.add(reminder['title'])
+    for event in events:
+        if(event['summary'] not in reminder_set):
+            added_events.append(event)
+    return added_events
+
+def get_deleted():
+    pass
+
+
 if __name__ == "__main__":
+    
+    #delete_all_reminders()
     main()
