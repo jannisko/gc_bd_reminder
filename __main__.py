@@ -4,7 +4,7 @@ from pathlib import Path
 
 import argparse
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import pickle
 import logging
 import re
@@ -167,8 +167,32 @@ def get_deleted(events, reminders):
             reminders_to_be_deleted.append(reminder)
     return reminders_to_be_deleted
 
+
 if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description='Create reminders for birthday events in Google Calendar')
+    parser.add_argument('--delete', dest='delete_all', action='store_true',
+                        help='Delete all reminders created by this script')
+    parser.add_argument('--days', dest='days_in_advance', type=int,
+                        action='store', default=0,
+                        help='Specify how many days before the birthday the reminder should be set (default=0)')
+    parser.add_argument('--time', dest='time_of_day', type=time.fromisoformat,
+                        action='store', default='07:00:00',
+                        help='Specify at what time of day the reminder should be set (format=hh[:mm[:ss]], default=07:00:00)')
+
+    # TODO: automate script within itself or outside?
+
+    args = parser.parse_args()
+
+#    time_of_day = time.fromisoformat(args.time_of_day)
+    print(args)
+  #  print(time_of_day)
+
 
     #delete_all_reminders()
     #main()
-    
+    # api = ReminderApi()
+    # reminders = api.list()
+    # for reminder in reminders['task']:
+    #     if(APP_NAME in reminder['taskId']['clientAssignedId']):
+    #         pprint(reminder['title'])
