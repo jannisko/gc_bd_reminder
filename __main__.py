@@ -2,6 +2,8 @@ from os import environ, path
 from dotenv import load_dotenv
 from pathlib import Path
 
+import argparse
+
 from datetime import datetime, timedelta
 import pickle
 import logging
@@ -9,7 +11,7 @@ import re
 
 from pprint import pprint
 
-logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -49,11 +51,20 @@ def main():
 
     added_events = get_added(events, reminders)
     logging.info(f'Found {len(added_events)} new events')
+    delete_reminders = get_deleted(events, reminders)
+    logging.info(f'Found {len(delete_reminders)} reminders to be deleted')
+    
+
     #deleted = get_deleted(events, reminders)
     
-    for event in events:
-        pass
-        #create_reminder(event)
+    for event in added_events:
+        create_reminder(event)
+
+    for reminder in delete_reminders:
+        delete_reminder(reminder)
+
+    
+
 
     if not events:
         logging.info('No upcoming birthday events found.')
@@ -126,9 +137,14 @@ def create_reminder(event):
     api = ReminderApi()
     start_date = datetime.strptime(event['start']['date'], '%Y-%m-%d')
     start_date += timedelta(hours=8)
-    logging.info(f'Creating Event: {event["summary"]}, Date:  + {str(start_date)}')
+    logging.info(f'Creating Event: {event["summary"]}, Date: {str(start_date)}')
     logging.debug(f'ID: {create_valid_id(event)}')
     api.create(event['summary'], due_date=start_date, taskId={'clientAssignedId': create_valid_id(event)})
+
+def delete_reminder(reminder):
+    api = ReminderApi()
+    logging.info(f'Deleting Reminder: {reminder["title"]}')
+    api.delete(reminder['taskId']['serverAssignedId'])
 
 def get_added(events, reminders):
     reminder_set = set()
@@ -140,11 +156,19 @@ def get_added(events, reminders):
             added_events.append(event)
     return added_events
 
-def get_deleted():
-    pass
-
+def get_deleted(events, reminders):
+    event_set = set()
+    reminders_to_be_deleted = list()
+    for event in events:
+        event_set.add(event['summary'])
+    for reminder in reminders['task']:
+        if reminder['title'] not in event_set and \
+            APP_NAME in reminder['taskId']['clientAssignedId']:
+            reminders_to_be_deleted.append(reminder)
+    return reminders_to_be_deleted
 
 if __name__ == "__main__":
-    
+
     #delete_all_reminders()
-    main()
+    #main()
+    
