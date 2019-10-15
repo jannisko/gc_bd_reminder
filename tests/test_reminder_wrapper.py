@@ -14,9 +14,10 @@ def test_list():
     reminders = api.list()
     assert type(reminders) == dict
 
-def test_create():
+def test_create_get_delete():
     client_assigned_id = 'test_reminder_id'
     api = ReminderApi()
     api.create('test_reminder', taskId={'clientAssignedId': client_assigned_id})
     reminder = api.get('', taskId={'clientAssignedId': client_assigned_id})
     assert reminder['task'][0]['taskId']['clientAssignedId'] == client_assigned_id
+    api.delete('', taskId={'clientAssignedId': client_assigned_id})
