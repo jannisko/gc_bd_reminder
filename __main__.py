@@ -3,6 +3,18 @@ import argparse
 from datetime import time
 
 import logging
+import os
+from dotenv import load_dotenv
+
+# if reminder api credentials haven't been set before starting the script,
+# try to get them from .env file
+if(os.environ.get('SID') == None):
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(file_path, '../auth.env')
+    load_dotenv(dotenv_path=env_path)
+
+# the api wrapper has to be imported after setting the environment variables
+# because the env variables get read at import time
 
 from src.gc_bd_reminder import gc_bd_reminder
 
@@ -23,7 +35,8 @@ def main():
                         help='Specify at what time of day the reminder should be set (format=hh[:mm[:ss]], default=07:00:00)')
 
     args = parser.parse_args()
-    print(args  )
+    
+    logging.info(args)
 
     app = gc_bd_reminder(args.days_in_advance, args.time_of_day)
 

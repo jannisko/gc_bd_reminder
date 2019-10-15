@@ -1,5 +1,4 @@
 from os import environ, path
-from dotenv import load_dotenv
 from pathlib import Path
 import re
 from datetime import datetime, timedelta, time
@@ -10,12 +9,6 @@ import pickle
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
-env_path = Path('.') / 'auth.env'
-load_dotenv(dotenv_path=env_path)
-
-# the api wrapper has to be imported after setting the environment variables
-# because the env variables get read at import time
 
 from google_reminder_api_wrapper.reminder_api import ReminderApi
 
