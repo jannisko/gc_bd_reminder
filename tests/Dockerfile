@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT [ "python", "." ]
+CMD python -m pytest -v tests
